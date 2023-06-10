@@ -258,6 +258,10 @@ main()
 # 3. How do you assign synthetic keys in a concurrent environment
 #   - We implemented auto-increment for the synthetic key (surrogate key) as part of table creation. This mechanism, provided by the database system, ensures that 
 #       each transaction receives a unique key by incrementing the previous value.
+
+# Refs:
+# https://dev.mysql.com/doc/refman/8.0/en/concurrent-inserts.html
+# https://www.linkedin.com/pulse/oracle-mysql-its-challenges-concurrency-seema-bhandari/
   
   
   
