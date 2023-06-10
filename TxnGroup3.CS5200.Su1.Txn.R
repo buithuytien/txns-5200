@@ -135,12 +135,17 @@ addRestaurantAndCuisine <- function(dbcon, txnFailed, restaurantName)
 #' @param restaurantName
 getCuisineFromRestaurant <- function(restaurantName)
 {
-  # TODO: 
+  # Determine cuisine based on restaurant name
   res <- switch(restaurantName,
+                # added by Arnav
                 "El Jefe's" = "Mexican",
                 "McDonald's" = "American",
+                # added by Thuytieh
                 "Chinese123" = "Chinese",
-                "American456" = "American"
+                "American456" = "American",
+                # added by Thai Pham,
+                "Fogo Dechao" = "Brazillian",
+                "Araki Sushi" = "Japanese"
                 )
 }
 
