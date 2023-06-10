@@ -233,3 +233,34 @@ main <- function()
 
 
 main()
+
+
+
+
+# Q4: Test this all at the same time -- how would you back out inserted data? How do you deal with concurrency? How do you assign synthetic keys in a concurrent environment?
+# 
+# Answer:
+# 1. how would you back out inserted data?
+#   Rollback: If one or more executions within a transaction fails, all the changes made by that transaction must be rollbacked.
+#   We implemented a check for transaction status, and commit transaction if no failure, otherwise rollback
+#   
+# 2. How do you deal with concurrency?
+#   MySQL DB obeys rules and regulations of the ACID property (atomicity, consistency, isolation, and durability). MySQL implements the following concurrency control methods:
+#   - Table lock: In this type of locking, the entire table is locked. This locking is considered as the lowest level of handling concurrency. 
+#       Whenever a database user tends to write to a table, it will get a write lock that stops all of the read and write operation for a while. 
+#       This process continues to read the table as far as it does not conflict with other read operations. MySQL is quite popular for keeping locks to a table to a certain level.
+#   - Rowlock: This is one of the most popular and greatest concurrency methods defined in MySQL. This locking mechanism tends to be carried out in the 
+#       storage level rather than on the server. This lock tends to work more with a storage engine than with a server such that the server will be unaware 
+#       of this type of locking activity being conducted in the storage engine.
+#   - Isolation level: MySQL has also defined isolation level depending upon which concurrency is controlled. Altogether, there are four types of isolation level. 
+#       They are serializable, read uncommitted, read committed, and repeatable read. All of these isolation levels are offered with a certain level of access and 
+#       tasks that can be conducted by each of them with the MySQL database.
+# 3. How do you assign synthetic keys in a concurrent environment
+#   - We implemented auto-increment for the synthetic key (surrogate key) as part of table creation. This mechanism, provided by the database system, ensures that 
+#       each transaction receives a unique key by incrementing the previous value.
+  
+  
+  
+
+
+
