@@ -35,13 +35,32 @@ connectMySQL <- function()
 #' @returns Large single CSV with all data
 readAllCSVs <- function(filename)
 {
-  files <- c(filename)
-  allRestaurantsDf <- do.call(rbind,lapply(files,read.csv))
-  
+  # files <- c(filename)
+  # allRestaurantsDf <- do.call(rbind,lapply(files,read.csv))
+  allRestaurantsDf <- read.csv(filename)
   # drop all NAs rows
   allRestaurantsDf <- allRestaurantsDf[complete.cases(allRestaurantsDf), ]
   
   return(allRestaurantsDf)
+}
+
+
+#' Given all filenames, do all transactions, one per file
+#' 
+#' @param dbcon Database connection
+#' @param filenames Names of all CSV files
+#' @returns List of success values of all transactions as booleans
+doAllTransactions <- function(dbcon, filenames)
+{
+  allSuccesses <- c()
+  for (filename in filenames)
+  {
+    transactionDf <- readAllCSVs(filename)
+    print(transactionDf)
+    success <- doTransaction(dbcon, transactionDf)
+    allSuccesses <- c(allSuccesses, success)
+  }
+  return(allSuccesses)
 }
 
 
@@ -73,6 +92,10 @@ doTransaction <- function(dbcon, transactionDfs)
     dbExecute(dbcon, "ROLLBACK")
   else
     dbExecute(dbcon, "COMMIT")
+  
+  # print status
+  if (!txnFailed) print("TRANSACTION COMMITTED.") 
+  else print("TRANSACTION FAILED. ROLLING BACK.")
   
   # return status; TRUE if successful; FALSE if failed
   return (!txnFailed)
@@ -218,21 +241,29 @@ main <- function()
   
   sql <- "SELECT * FROM visits"
   res <- dbGetQuery(mydb, sql)
-  print(paste0("Rows before transaction: ", nrow(res)))
+  print(paste0("Rows before transactions: ", nrow(res)))
   
-  # CHANGE CSV NAME HERE
-  csvFilename <- "https://5200-assignments.s3.us-east-2.amazonaws.com/synthsalestxns-20230609.csv"
+  # CHANGE CSV FILENAMES HERE IF DESIRED
+  csvFilenames <- c("https://raw.githubusercontent.com/buithuytien/txns-5200/main/JoshiATransactions.csv",
+                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/synthsalestxns-20230609.csv",
+                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/AndyTransactions.csv",
+                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/newfile.csv",
+                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/tom_visits.csv")
   
-  transactionDfs <- readAllCSVs(csvFilename)
-  print(transactionDfs)
-
-  txns_status <- doTransaction(mydb, transactionDfs)
-  if (txns_status) print("TRANSACTION COMMITTED.") 
-  else print("TRANSACTION FAILED. ROLLING BACK.")
-  
+  allSuccesses <- doAllTransactions(mydb, csvFilenames)
+  if (all(allSuccesses))
+  {
+    print("ALL TRANSACTIONS COMMITTED.")
+  }
+  else
+  {
+    print("SOME OR ALL TRANSACTIONS ROLLED BACK.")
+    print(paste0("TRANSACTIONS: ", which(allSuccesses == F)))
+  }
+   
   # check number of visits after transaction
   res2 <- dbGetQuery(mydb, sql)
-  print(paste0("Rows after transaction: ", nrow(res2)))
+  print(paste0("Rows after transactions: ", nrow(res2)))
   
   status <- dbDisconnect(mydb)
 }
