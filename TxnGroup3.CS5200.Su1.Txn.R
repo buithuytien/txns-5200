@@ -243,12 +243,11 @@ main <- function()
   res <- dbGetQuery(mydb, sql)
   print(paste0("Rows before transactions: ", nrow(res)))
   
-  # CHANGE CSV FILENAMES HERE IF DESIRED
-  csvFilenames <- c("https://raw.githubusercontent.com/buithuytien/txns-5200/main/JoshiATransactions.csv",
-                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/synthsalestxns-20230609.csv",
-                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/AndyTransactions.csv",
-                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/newfile.csv",
-                    "https://raw.githubusercontent.com/buithuytien/txns-5200/main/tom_visits.csv")
+  csvFilenames <- c("https://raw.githubusercontent.com/buithuytien/txns-5200/main/JoshiATransactions.csv")
+                    # "https://raw.githubusercontent.com/buithuytien/txns-5200/main/synthsalestxns-20230609.csv",
+                    # "https://raw.githubusercontent.com/buithuytien/txns-5200/main/AndyTransactions.csv",
+                    # "https://raw.githubusercontent.com/buithuytien/txns-5200/main/newfile.csv",
+                    # "https://raw.githubusercontent.com/buithuytien/txns-5200/main/tom_visits.csv")
   
   allSuccesses <- doAllTransactions(mydb, csvFilenames)
   if (all(allSuccesses))
