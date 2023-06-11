@@ -33,9 +33,9 @@ connectMySQL <- function()
 #' Reads all supplied CSVs into a single large CSV
 #' 
 #' @returns Large single CSV with all data
-readAllCSVs <- function()
+readAllCSVs <- function(filename)
 {
-  files <- c("https://5200-assignments.s3.us-east-2.amazonaws.com/synthsalestxns-20230609.csv") # c("transactionsFiveEntries.csv") # TODO: change csv file
+  files <- c(filename)
   allRestaurantsDf <- do.call(rbind,lapply(files,read.csv))
   
   # drop all NAs rows
@@ -145,8 +145,14 @@ getCuisineFromRestaurant <- function(restaurantName)
                 "American456" = "American",
                 # added by Thai Pham,
                 "Fogo Dechao" = "Brazillian",
-                "Araki Sushi" = "Japanese"
-                )
+                "Araki Sushi" = "Japanese",
+                # Added by Tom
+                "KBBQ" = "Korean",
+                "Chipotle" = "Mexican",
+                # Added by Andy
+                "Changs" = "Chinese",
+                "Olive Garden" = "Italian"
+  )
 }
 
 
@@ -212,18 +218,21 @@ main <- function()
   
   sql <- "SELECT * FROM visits"
   res <- dbGetQuery(mydb, sql)
-  nrow(res)
+  print(paste0("Rows before transaction: ", nrow(res)))
   
-  transactionDfs <- readAllCSVs()
+  # CHANGE CSV NAME HERE
+  csvFilename <- "https://5200-assignments.s3.us-east-2.amazonaws.com/synthsalestxns-20230609.csv"
+  
+  transactionDfs <- readAllCSVs(csvFilename)
   print(transactionDfs)
-  
+
   txns_status <- doTransaction(mydb, transactionDfs)
-  print(txns_status)
+  if (txns_status) print("TRANSACTION COMMITTED.") 
+  else print("TRANSACTION FAILED. ROLLING BACK.")
   
   # check number of visits after transaction
   res2 <- dbGetQuery(mydb, sql)
-  nrow(res2)
-  
+  print(paste0("Rows after transaction: ", nrow(res2)))
   
   status <- dbDisconnect(mydb)
 }
@@ -262,9 +271,8 @@ main()
 # Refs:
 # https://dev.mysql.com/doc/refman/8.0/en/concurrent-inserts.html
 # https://www.linkedin.com/pulse/oracle-mysql-its-challenges-concurrency-seema-bhandari/
-  
-  
-  
+
+
 
 
 

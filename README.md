@@ -1,25 +1,39 @@
 # txns-5200
-5200 assignemnt - implement transactions to cloud MYSQL db
 
-There are 5 csv in this repo - contributed by the members of this group
+5200 assignment - Implement Transactions to cloud MYSQL DB
 
-When running the script, please change the directory of the csv file in this function:
+There are 5 CSVs in this repo - contributed by the members of this group
+
+When running the script, please change the directory of the CSV file in the main function at the bottom of the code where it says CHANGE CSV NAME HERE:
 
 ```
-readAllCSVs <- function()
+main <- function()
 {
-  # TODO: add your csv directory here
-  files <- c("https://5200-assignments.s3.us-east-2.amazonaws.com/synthsalestxns-20230609.csv") # c("transactionsFiveEntries.csv") # TODO: change csv file
-  allRestaurantsDf <- do.call(rbind,lapply(files,read.csv))
-  
-  # drop all NAs rows
-  allRestaurantsDf <- allRestaurantsDf[complete.cases(allRestaurantsDf), ]
-  
-  return(allRestaurantsDf)
+  mydb <- connectMySQL()
+
+  sql <- "SELECT * FROM visits"
+  res <- dbGetQuery(mydb, sql)
+  print(paste0("Rows before transaction: ", nrow(res)))
+
+  # CHANGE CSV NAME HERE
+  csvFilename <- "https://5200-assignments.s3.us-east-2.amazonaws.com/synthsalestxns-20230609.csv"
+
+  transactionDfs <- readAllCSVs(csvFilename)
+  print(transactionDfs)
+
+  txns_status <- doTransaction(mydb, transactionDfs)
+  if (txns_status) print("TRANSACTION COMMITTED.")
+  else print("TRANSACTION FAILED. ROLLING BACK.")
+
+  # check number of visits after transaction
+  res2 <- dbGetQuery(mydb, sql)
+  print(paste0("Rows after transaction: ", nrow(res2)))
+
+  status <- dbDisconnect(mydb)
 }
 ```
 
-Also make sure that the new restaurants and its matching cuisine are added in the swith case:
+Restaurant cuisines are hardcoded, please add cuisines if new restaurants are present in the visits:
 
 ```
 getCuisineFromRestaurant <- function(restaurantName)
@@ -34,9 +48,13 @@ getCuisineFromRestaurant <- function(restaurantName)
                 "American456" = "American",
                 # added by Thai Pham,
                 "Fogo Dechao" = "Brazillian",
-                "Araki Sushi" = "Japanese"
-                # add your restaurant name - cuisine name pair below
-                )
+                "Araki Sushi" = "Japanese",
+                # Added by Tom
+                "KBBQ" = "Korean",
+                "Chipotle" = "Mexican",
+                # Added by Andy
+                "Changs" = "Chinese",
+                "Olive Garden" = "Italian"
+  )
 }
 ```
-
